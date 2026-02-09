@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unregister Service Worker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .box {
+            background: #f0f0f0;
+            padding: 30px;
+            border-radius: 10px;
+        }
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>🔧 Fix Service Worker Issue</h1>
+        <p>Click the button below to unregister the old service worker:</p>
+        <button onclick="unregisterSW()">Unregister Service Worker</button>
+        <div id="result"></div>
+        <hr>
+        <p><a href="/">← Back to Smart Dent AI</a></p>
+    </div>
+
+    <script>
+        async function unregisterSW() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>Working...</p>';
+            
+            try {
+                if ('serviceWorker' in navigator) {
+                    const registrations = await navigator.serviceWorker.getRegistrations();
+                    
+                    if (registrations.length === 0) {
+                        resultDiv.innerHTML = '<p class="success">✓ No service workers found. You\'re good!</p>';
+                        return;
+                    }
+                    
+                    for (let registration of registrations) {
+                        await registration.unregister();
+                    }
+                    
+                    // Clear caches
+                    const cacheNames = await caches.keys();
+                    for (let cacheName of cacheNames) {
+                        await caches.delete(cacheName);
+                    }
+                    
+                    resultDiv.innerHTML = `
+                        <p class="success">✓ Service worker unregistered!</p>
+                        <p class="success">✓ Caches cleared!</p>
+                        <p><strong>Now reload the page:</strong></p>
+                        <button onclick="location.reload()">Reload Page</button>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<p class="error">Service workers not supported</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -21,6 +21,29 @@ class DentalAIModel:
         """Check if the model is loaded and ready"""
         return self.model_loaded
     
+    def is_model_loaded(self) -> bool:
+        """Alias for is_loaded for compatibility"""
+        return self.is_loaded()
+    
+    def get_model_info(self) -> dict:
+        """Get model information"""
+        return {
+            "model_type": "OpenCV-based Analysis",
+            "version": "1.0.0",
+            "capabilities": [
+                "Tooth yellowness detection",
+                "Dental flaw detection",
+                "Plaque/tartar detection",
+                "Overall health scoring"
+            ],
+            "loaded": self.model_loaded
+        }
+    
+    def reload_model(self):
+        """Reload the model (for OpenCV, just reset state)"""
+        self.model_loaded = True
+        self.analysis_history = []
+    
     def preprocess_image(self, image: Image.Image) -> np.ndarray:
         """Enhanced image preprocessing for dental analysis"""
         try:

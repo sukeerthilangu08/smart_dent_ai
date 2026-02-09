@@ -104,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     async function performAnalysis(base64Image) {
         try {
+            console.log('Starting analysis...');
+            
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
@@ -112,38 +114,70 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: JSON.stringify({ image: base64Image }),
             });
 
+            console.log('Response status:', response.status);
+
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(errorData.error || 'Analysis failed');
             }
 
             const data = await response.json();
+            console.log('Analysis response:', data);
 
             if (data.success) {
-                // Adapt the backend data structure to what the frontend's displayResults function expects.
+                const result = data.result;
+                
+                // Build conditions array from analysis results
+                const conditions = [];
+                
+                // Add yellowness condition
+                if (result.yellowness_analysis) {
+                    const yellow = result.yellowness_analysis;
+                    let severity = 'good';
+                    if (yellow.yellowness_score > 0.6) severity = 'severe';
+                    else if (yellow.yellowness_score > 0.3) severity = 'moderate';
+                    
+                    conditions.push({
+                        name: 'Tooth Whiteness',
+                        severity: severity,
+                        confidence: Math.round((1 - yellow.yellowness_score) * 100),
+                        details: yellow.severity
+                    });
+                }
+                
+                // Add dental flaws condition
+                if (result.flaws_analysis) {
+                    const flaws = result.flaws_analysis;
+                    let severity = 'good';
+                    if (flaws.flaw_score > 0.6) severity = 'severe';
+                    else if (flaws.flaw_score > 0.3) severity = 'moderate';
+                    
+                    conditions.push({
+                        name: 'Dental Health',
+                        severity: severity,
+                        confidence: Math.round((1 - flaws.flaw_score) * 100),
+                        details: flaws.severity
+                    });
+                }
+                
+                // Combine all recommendations
+                const allRecommendations = [
+                    ...(result.yellowness_analysis?.recommendations || []),
+                    ...(result.flaws_analysis?.recommendations || [])
+                ];
+                
+                // Remove duplicates and limit to top 5
+                const uniqueRecommendations = [...new Set(allRecommendations)].slice(0, 5);
+                
                 const adaptedData = {
-                    conditions: (data.result.summary.primary_concerns.length > 0 ? data.result.summary.primary_concerns : ["Overall Health: Good"]).map(concern => {
-                        const parts = concern.split(':');
-                        const name = parts[0];
-                        const severityText = (parts[1] || 'good').trim().toLowerCase();
-                        let severity = 'good';
-                        if (severityText.includes('moderate') || severityText.includes('fair')) {
-                            severity = 'moderate';
-                        } else if (severityText.includes('severe') || severityText.includes('critical')) {
-                            severity = 'severe';
-                        } else if (severityText.includes('needs_attention')) {
-                            severity = 'needs_attention';
-                        }
-                        return {
-                            name: name,
-                            severity: severity,
-                            confidence: Math.round(data.result.overall_assessment.overall_score * 100)
-                        };
-                    }),
-                    recommendations: data.result.summary.recommendations,
-                    overallScore: Math.round(data.result.overall_assessment.overall_score * 100),
-                    timestamp: new Date(data.result.timestamp)
+                    conditions: conditions,
+                    recommendations: uniqueRecommendations.length > 0 ? uniqueRecommendations : ['Maintain good oral hygiene'],
+                    overallScore: Math.round(result.overall_assessment.overall_score * 100),
+                    grade: result.overall_assessment.grade,
+                    timestamp: new Date(result.timestamp)
                 };
+                
+                console.log('Adapted data:', adaptedData);
                 displayResults(adaptedData);
                 updateDashboard(adaptedData);
             } else {
@@ -152,7 +186,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             console.error('Analysis Error:', error);
-            analysisResults.innerHTML = `<div class="result-item result-danger"><strong>Error:</strong> ${error.message}</div>`;
+            analysisResults.innerHTML = `
+                <div class="result-item result-danger">
+                    <strong>Error:</strong> ${error.message}
+                    <br><small>Please check the console for more details or try again.</small>
+                </div>
+            `;
             resultsPanel.style.display = 'block';
         } finally {
             analyzeBtn.innerHTML = 'Analyze Again';
@@ -187,35 +226,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function displayResults(data) {
         let resultsHTML = '<div class="analysis-summary">';
-        resultsHTML += `<h4>Overall Oral Health Score: ${data.overallScore}%</h4>`;
+        resultsHTML += `<h4>Overall Oral Health Score: ${data.overallScore}% (Grade: ${data.grade || 'N/A'})</h4>`;
+        resultsHTML += `<p style="opacity: 0.9; margin-top: 0.5rem;">Analysis completed at ${data.timestamp.toLocaleTimeString()}</p>`;
         resultsHTML += '</div>';
 
         resultsHTML += '<div class="conditions-analysis">';
         resultsHTML += '<h4>Detected Conditions:</h4>';
         
-        data.conditions.forEach(condition => {
-            const severityClass = getSeverityClass(condition.severity);
-            resultsHTML += `
-                <div class="result-item ${severityClass}">
-                    <strong>${condition.name}</strong>
-                    <span style="float: right;">${condition.confidence}% confidence</span>
-                    <br>
-                    <small>Status: ${formatSeverity(condition.severity)}</small>
-                </div>
-            `;
-        });
+        if (data.conditions && data.conditions.length > 0) {
+            data.conditions.forEach(condition => {
+                const severityClass = getSeverityClass(condition.severity);
+                resultsHTML += `
+                    <div class="result-item ${severityClass}">
+                        <strong>${condition.name}</strong>
+                        <span style="float: right;">${condition.confidence}%</span>
+                        <br>
+                        <small>Status: ${formatSeverity(condition.severity)}</small>
+                        ${condition.details ? `<br><small style="opacity: 0.8;">${condition.details}</small>` : ''}
+                    </div>
+                `;
+            });
+        } else {
+            resultsHTML += '<p style="opacity: 0.8;">No specific conditions detected. Overall health appears good.</p>';
+        }
         resultsHTML += '</div>';
 
         resultsHTML += '<div class="recommendations">';
         resultsHTML += '<h4>Recommendations:</h4>';
-        resultsHTML += '<ul>';
-        data.recommendations.forEach(rec => {
-            resultsHTML += `<li>${rec}</li>`;
-        });
-        resultsHTML += '</ul>';
+        if (data.recommendations && data.recommendations.length > 0) {
+            resultsHTML += '<ul>';
+            data.recommendations.forEach(rec => {
+                resultsHTML += `<li>${rec}</li>`;
+            });
+            resultsHTML += '</ul>';
+        } else {
+            resultsHTML += '<p style="opacity: 0.8;">Continue maintaining good oral hygiene practices.</p>';
+        }
         resultsHTML += '</div>';
 
         analysisResults.innerHTML = resultsHTML;
+        resultsPanel.style.display = 'block';
+        
+        // Scroll to results
+        resultsPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
     function getSeverityClass(severity) {
@@ -449,6 +502,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Service Worker registration for offline capabilities
+// TEMPORARILY DISABLED - Uncomment to re-enable
+/*
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js')
@@ -460,3 +515,5 @@ if ('serviceWorker' in navigator) {
             });
     });
 }
+*/
+console.log('Service Worker disabled for debugging');

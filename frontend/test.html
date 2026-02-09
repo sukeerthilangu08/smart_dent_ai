@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test - Smart Dent AI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-box {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #357abd;
+        }
+        pre {
+            background: #f8f8f8;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .success { color: green; font-weight: bold; }
+        .error { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🦷 Smart Dent AI - API Test</h1>
+    
+    <div class="test-box">
+        <h2>Test 1: Health Check</h2>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <div id="health-result"></div>
+    </div>
+    
+    <div class="test-box">
+        <h2>Test 2: Analysis with Sample Image</h2>
+        <button onclick="testAnalysis()">Test Analysis Endpoint</button>
+        <div id="analysis-result"></div>
+    </div>
+    
+    <div class="test-box">
+        <h2>Test 3: Model Info</h2>
+        <button onclick="testModelInfo()">Test Model Info</button>
+        <div id="model-result"></div>
+    </div>
+
+    <script>
+        async function testHealth() {
+            const resultDiv = document.getElementById('health-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✓ Success!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+            }
+        }
+        
+        async function testAnalysis() {
+            const resultDiv = document.getElementById('analysis-result');
+            resultDiv.innerHTML = '<p>Testing... (creating sample image)</p>';
+            
+            try {
+                // Create a simple white canvas as test image
+                const canvas = document.createElement('canvas');
+                canvas.width = 480;
+                canvas.height = 480;
+                const ctx = canvas.getContext('2d');
+                
+                // Fill with white (simulating teeth)
+                ctx.fillStyle = '#F0F0F0';
+                ctx.fillRect(0, 0, 480, 480);
+                
+                // Add some variation (simulating tooth texture)
+                ctx.fillStyle = '#E8E8E8';
+                ctx.fillRect(100, 100, 280, 280);
+                
+                const base64Image = canvas.toDataURL('image/jpeg');
+                
+                resultDiv.innerHTML = '<p>Sending to API...</p>';
+                
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Image })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const result = data.result;
+                    resultDiv.innerHTML = `
+                        <p class="success">✓ Analysis Successful!</p>
+                        <h3>Results:</h3>
+                        <ul>
+                            <li><strong>Overall Score:</strong> ${Math.round(result.overall_assessment.overall_score * 100)}%</li>
+                            <li><strong>Grade:</strong> ${result.overall_assessment.grade}</li>
+                            <li><strong>Teeth Detected:</strong> ${result.teeth_detected}</li>
+                            <li><strong>Yellowness Score:</strong> ${result.yellowness_analysis.yellowness_score}</li>
+                            <li><strong>Flaw Score:</strong> ${result.flaws_analysis.flaw_score}</li>
+                        </ul>
+                        <h3>Full Response:</h3>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="error">✗ Analysis failed: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+                console.error('Full error:', error);
+            }
+        }
+        
+        async function testModelInfo() {
+            const resultDiv = document.getElementById('model-result');
+            resultDiv.innerHTML = '<p>Testing...</p>';
+            
+            try {
+                const response = await fetch('/api/model/info');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p class="success">✓ Success!</p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">✗ Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

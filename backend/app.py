@@ -82,15 +82,35 @@ def validate_image_quality(image):
         logger.error(f"Error validating image: {e}")
         return False, "Error validating image quality"
 
+def convert_numpy_to_python_types(obj):
+    """
+    Recursively converts numpy types (integers, floats, booleans, ndarray) to standard Python types.
+    """
+    if isinstance(obj, (np.integer, np.int_, np.intc, np.intp, np.int8,
+                       np.int16, np.int32, np.int64, np.uint8,
+                       np.uint16, np.uint32, np.uint64)):
+        return int(obj)
+    elif isinstance(obj, (np.floating, np.float_, np.float16, np.float32, np.float64)):
+        return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {k: convert_numpy_to_python_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_to_python_types(elem) for elem in obj]
+    return obj
+
 @app.route('/')
 def index():
     """Serve the main page"""
-    return send_from_directory('frontend', 'index.html')
+    return send_from_directory('../frontend', 'index.html')
 
 @app.route('/<path:filename>')
 def serve_static(filename):
     """Serve static files from frontend directory"""
-    return send_from_directory('frontend', filename)
+    return send_from_directory('../frontend', filename)
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -136,18 +156,19 @@ def analyze_dental_image():
         
         # Perform AI analysis
         try:
-            analysis_result = dental_ai.analyze_image(image)
+            analysis_result = dental_ai.analyze_dental_image(image)
+            analysis_result_clean = convert_numpy_to_python_types(analysis_result)
             
             # Add processing time
             processing_time = round(time.time() - start_time, 2)
-            analysis_result['processing_time'] = processing_time
-            analysis_result['image_path'] = filepath
+            analysis_result_clean['processing_time'] = processing_time
+            analysis_result_clean['image_path'] = filepath
             
             logger.info(f"Analysis completed in {processing_time}s")
             
             return jsonify({
                 'success': True,
-                'result': analysis_result,
+                'result': analysis_result_clean,
                 'message': 'Analysis completed successfully'
             })
             
@@ -316,6 +337,6 @@ if __name__ == '__main__':
     # Start the Flask app
     app.run(
         host='0.0.0.0',
-        port=int(os.environ.get('PORT', 5000)),
+        port=int(os.environ.get('PORT', 8000)),
         debug=os.environ.get('DEBUG', 'False').lower() == 'true'
     )
