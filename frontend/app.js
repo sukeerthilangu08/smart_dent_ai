@@ -99,23 +99,65 @@ document.addEventListener('DOMContentLoaded', function() {
         analyzeBtn.disabled = true;
         analyzeBtn.innerHTML = '<span class="loading"></span> Analyzing...';
         
-        // Simulate AI analysis
-        setTimeout(() => {
-            performAnalysis();
-        }, 3000);
+        performAnalysis(capturedImage);
     });
 
-    function performAnalysis() {
-        // Simulate AI analysis results
-        const analysisData = generateMockAnalysis();
-        
-        displayResults(analysisData);
-        resultsPanel.style.display = 'block';
-        analyzeBtn.innerHTML = 'Analyze Again';
-        analyzeBtn.disabled = false;
-        
-        // Update dashboard with new data
-        updateDashboard(analysisData);
+    async function performAnalysis(base64Image) {
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: base64Image }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Analysis failed');
+            }
+
+            const data = await response.json();
+
+            if (data.success) {
+                // Adapt the backend data structure to what the frontend's displayResults function expects.
+                const adaptedData = {
+                    conditions: (data.result.summary.primary_concerns.length > 0 ? data.result.summary.primary_concerns : ["Overall Health: Good"]).map(concern => {
+                        const parts = concern.split(':');
+                        const name = parts[0];
+                        const severityText = (parts[1] || 'good').trim().toLowerCase();
+                        let severity = 'good';
+                        if (severityText.includes('moderate') || severityText.includes('fair')) {
+                            severity = 'moderate';
+                        } else if (severityText.includes('severe') || severityText.includes('critical')) {
+                            severity = 'severe';
+                        } else if (severityText.includes('needs_attention')) {
+                            severity = 'needs_attention';
+                        }
+                        return {
+                            name: name,
+                            severity: severity,
+                            confidence: Math.round(data.result.overall_assessment.overall_score * 100)
+                        };
+                    }),
+                    recommendations: data.result.summary.recommendations,
+                    overallScore: Math.round(data.result.overall_assessment.overall_score * 100),
+                    timestamp: new Date(data.result.timestamp)
+                };
+                displayResults(adaptedData);
+                updateDashboard(adaptedData);
+            } else {
+                throw new Error(data.message || 'Analysis did not complete successfully.');
+            }
+
+        } catch (error) {
+            console.error('Analysis Error:', error);
+            analysisResults.innerHTML = `<div class="result-item result-danger"><strong>Error:</strong> ${error.message}</div>`;
+            resultsPanel.style.display = 'block';
+        } finally {
+            analyzeBtn.innerHTML = 'Analyze Again';
+            analyzeBtn.disabled = false;
+        }
     }
 
     function generateMockAnalysis() {
