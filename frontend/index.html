@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Dent AI - Intelligent Oral Health Monitoring</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <h2>🦷 Smart Dent AI</h2>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#scan">AI Scan</a></li>
+                    <li><a href="#about">About</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Hero Section -->
+        <section id="home" class="hero">
+            <div class="hero-content">
+                <h1>Intelligent Oral Health Monitoring for Everyone</h1>
+                <p>Empowering children, elderly, and rural residents with AI-powered dental care guidance. Monitor your oral health daily, prevent issues before they become painful or costly.</p>
+                <div class="hero-buttons">
+                    <button id="startScan" class="btn btn-primary">Start AI Scan</button>
+                    <button class="btn btn-secondary">Learn More</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="dental-animation">
+                    <div class="tooth-icon">🦷</div>
+                    <div class="ai-rings"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="features">
+            <div class="container">
+                <h2>Why Smart Dent AI?</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Early Detection</h3>
+                        <p>AI-powered analysis detects dental issues before they become painful or costly</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Daily Guidance</h3>
+                        <p>Personalized brushing tips and oral care recommendations based on real-time analysis</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌍</div>
+                        <h3>Accessible Care</h3>
+                        <p>Designed for underserved communities with limited access to dental professionals</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">👥</div>
+                        <h3>Family Friendly</h3>
+                        <p>Perfect for children, elderly, and caregivers to monitor oral health together</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Scan Interface -->
+        <section id="scan" class="scan-section">
+            <div class="container">
+                <h2>AI Dental Scan</h2>
+                <div class="scan-interface">
+                    <div class="camera-container">
+                        <video id="cameraFeed" autoplay playsinline></video>
+                        <canvas id="scanCanvas" style="display: none;"></canvas>
+                        <div class="scan-overlay">
+                            <div class="scan-frame"></div>
+                            <p id="scanStatus">Position your mouth within the frame</p>
+                        </div>
+                    </div>
+                    <div class="scan-controls">
+                        <button id="captureBtn" class="btn btn-primary">Capture Image</button>
+                        <button id="analyzeBtn" class="btn btn-secondary" disabled>Analyze</button>
+                    </div>
+                    <div id="results" class="results-panel" style="display: none;">
+                        <h3>Analysis Results</h3>
+                        <div id="analysisResults"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="dashboard">
+            <div class="container">
+                <h2>Your Oral Health Dashboard</h2>
+                <div class="dashboard-grid">
+                    <div class="dashboard-card">
+                        <h3>Health Score</h3>
+                        <div class="score-circle">
+                            <span id="healthScore">85</span>
+                            <span class="score-label">%</span>
+                        </div>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Daily Tips</h3>
+                        <ul id="dailyTips">
+                            <li>✓ Brush for 2 minutes minimum</li>
+                            <li>✓ Focus on gum line cleaning</li>
+                            <li>⚠ Increase flossing frequency</li>
+                        </ul>
+                    </div>
+                    <div class="dashboard-card">
+                        <h3>Recent Scans</h3>
+                        <div id="scanHistory">
+                            <div class="scan-item">
+                                <span class="scan-date">Today</span>
+                                <span class="scan-result good">Good</span>
+                            </div>
+                            <div class="scan-item">
+                                <span class="scan-date">Yesterday</span>
+                                <span class="scan-result warning">Attention Needed</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="about">
+            <div class="container">
+                <h2>About Smart Dent AI</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <h3>Our Mission</h3>
+                        <p>We believe everyone deserves access to quality dental care. Smart Dent AI bridges the gap between professional dental visits by providing intelligent, daily oral health monitoring that's accessible to children, elderly, and rural residents.</p>
+                        
+                        <h3>How It Works</h3>
+                        <p>Our AI-powered system uses computer vision to analyze oral health images, detecting early signs of dental issues like plaque buildup, gum inflammation, and other common problems. Users receive personalized guidance and can share reports with healthcare providers.</p>
+                        
+                        <h3>Key Benefits</h3>
+                        <ul>
+                            <li>Prevents costly dental emergencies through early detection</li>
+                            <li>Reduces dependency on frequent dental visits</li>
+                            <li>Empowers users with daily health insights</li>
+                            <li>Supports caregivers in monitoring family oral health</li>
+                        </ul>
+                    </div>
+                    <div class="about-stats">
+                        <div class="stat">
+                            <h3>85%</h3>
+                            <p>Of dental issues are preventable</p>
+                        </div>
+                        <div class="stat">
+                            <h3>2.3B</h3>
+                            <p>People lack access to dental care</p>
+                        </div>
+                        <div class="stat">
+                            <h3>$45B</h3>
+                            <p>Annual cost of dental emergencies</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Upcoming Features Section (Newly Added) -->
+        <section id="upcoming" class="upcoming-features">
+            <div class="container">
+                <h2>Upcoming Optimized Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎨</div>
+                        <h3>Enhanced Design</h3>
+                        <p>Modern styling with smoother UI, micro-interactions, and responsive animations for a polished experience.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>Improved AI Scan Interface</h3>
+                        <p>Upgraded scanning with smart alignment guidance, real-time feedback, and more accurate analysis.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Advanced Dashboard</h3>
+                        <p>Track trends over time, visualize oral health progress, and get dynamic alerts based on your scan history.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">✨</div>
+                        <h3>New Features & Tools</h3>
+                        <p>Adding support for multiple user roles, voice-based guidance, AI chat assistant, and multilingual expansion.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h3>Mobile Optimization</h3>
+                        <p>Better performance and layout across all devices, including mobile-first improvements and offline mode.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">♿</div>
+                        <h3>Accessibility Enhancements</h3>
+                        <p>Improved ARIA support, keyboard navigation, contrast improvements, and screen reader compatibility.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2>Get Started Today</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Ready to improve your oral health?</h3>
+                        <p>Join thousands of users who are already taking control of their dental health with Smart Dent AI.</p>
+                        <div class="contact-details">
+                            <p>📧 support@smartdentai.com</p>
+                            <p>📞 +1-800-SMART-DENT</p>
+                            <p>🌐 Available in 15+ languages</p>
+                        </div>
+                    </div>
+                    <div class="contact-form">
+                        <form id="contactForm">
+                            <input type="text" placeholder="Your Name" required>
+                            <input type="email" placeholder="Your Email" required>
+                            <select>
+                                <option>Individual User</option>
+                                <option>Healthcare Provider</option>
+                                <option>Rural Health Center</option>
+                                <option>School/Educational Institution</option>
+                            </select>
+                            <textarea placeholder="How can Smart Dent AI help you?" rows="4"></textarea>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Smart Dent AI</h3>
+                    <p>Intelligent oral health monitoring for everyone, everywhere.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Features</h4>
+                    <ul>
+                        <li><a href="#scan">AI Dental Scan</a></li>
+                        <li><a href="#dashboard">Health Dashboard</a></li>
+                        <li><a href="#features">Daily Guidance</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Support</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="#">Privacy Policy</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Community</h4>
+                    <ul>
+                        <li><a href="#">Healthcare Providers</a></li>
+                        <li><a href="#">Rural Health Centers</a></li>
+                        <li><a href="#">Educational Institutions</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 Smart Dent AI. All rights reserved. | Empowering oral health through AI technology.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
